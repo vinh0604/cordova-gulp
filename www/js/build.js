@@ -76999,19 +76999,21 @@ module.exports = exports['default'];
 Object.defineProperty(exports, '__esModule', {
     value: true
 });
-exports['default'] = TopBar;
-
-function TopBar() {
+exports['default'] = ['flux', function TopBar(flux) {
     return {
         replace: true,
         templateUrl: 'templates/TopBar.html',
         restrict: 'E',
         link: function link(scope, element, attr) {
             scope.keyword = '';
+        },
+        controller: function controller($scope) {
+            $scope.addNote = function () {
+                flux.dispatch('addNote');
+            };
         }
     };
-}
-
+}];
 module.exports = exports['default'];
 
 },{}],30:[function(require,module,exports){
@@ -77126,6 +77128,10 @@ var _angular2 = _interopRequireDefault(_angular);
 
 require('flux-angular');
 
+var _utils = require('./../utils');
+
+var _utils2 = _interopRequireDefault(_utils);
+
 var AppStore = _angular2['default'].module('app.stores', ['flux']).store('NoteStore', function (flux) {
     var state = flux.immutable({
         notes: [],
@@ -77135,14 +77141,9 @@ var AppStore = _angular2['default'].module('app.stores', ['flux']).store('NoteSt
     });
 
     var findIndex = function findIndex(note) {
-        if (note.id) {
-            return _lodash2['default'].findIndex(state.notes, function (_note) {
-                return _note.index === note.index;
-            });
-        } else {
-            state = state.notes.push(note);
-            return state.notes.length - 1;
-        }
+        return _lodash2['default'].findIndex(state.notes, function (_note) {
+            return _note.index === note.index;
+        });
     };
 
     return {
@@ -77151,7 +77152,22 @@ var AppStore = _angular2['default'].module('app.stores', ['flux']).store('NoteSt
             'addNote': 'addNote',
             'saveNote': 'saveNote',
             'setNotes': 'setNotes',
-            'selectNote': 'selectNote'
+            'selectNote': 'selectNote',
+            'addNote': 'addNote'
+        },
+        addNote: function addNote() {
+            var currentMaxId = _lodash2['default'].max(state.notes, function (_note) {
+                return _note.id;
+            }) || 0;
+
+            var note = {
+                id: currentMaxId + 1,
+                title: '',
+                content: ''
+            };
+
+            state = state.notes.unshift(note);
+            this.editNote(note);
         },
         selectNote: function selectNote(note) {
             var index = findIndex(note);
@@ -77170,6 +77186,7 @@ var AppStore = _angular2['default'].module('app.stores', ['flux']).store('NoteSt
             this.emitChange();
         },
         saveNote: function saveNote(note) {
+            note.summary = _utils2['default'].truncate(note.content, 30);
             state = state.notes.splice(state.selectedIndex, 1, note);
             state = state.set('selectedNote', note);
             this.emitChange();
@@ -77195,7 +77212,32 @@ var AppStore = _angular2['default'].module('app.stores', ['flux']).store('NoteSt
 exports['default'] = AppStore = AppStore.name;
 module.exports = exports['default'];
 
-},{"angular":4,"flux-angular":20,"lodash":22}]},{},[31])
+},{"./../utils":33,"angular":4,"flux-angular":20,"lodash":22}],33:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+exports['default'] = {
+    truncate: function truncate(str, length) {
+        length = length || 80;
+
+        if (length < str.length) {
+            var rawTruncatedStr = str.substr(0, length);
+            var whitespaceIndex = str.lastIndexOf(' ');
+
+            if (whitespaceIndex > -1) {
+                rawTruncatedStr = rawTruncatedStr.substr(0, rawTruncatedStr.lastIndexOf(' '));
+            }
+            return rawTruncatedStr + '...';
+        } else {
+            return str;
+        }
+    }
+};
+module.exports = exports['default'];
+
+},{}]},{},[31])
 
 
 //# sourceMappingURL=build.js.map

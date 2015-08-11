@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import angular from 'angular'
 import 'flux-angular'
+import Utils from './../utils'
 
 var AppStore = angular.module('app.stores', ['flux'])
 .store('NoteStore', function (flux) {
@@ -12,14 +13,9 @@ var AppStore = angular.module('app.stores', ['flux'])
     })
 
     var findIndex = function (note) {
-        if (note.id) {
-            return _.findIndex(state.notes, function (_note) {
-                return _note.index === note.index
-            })
-        } else {
-            state = state.notes.push(note)
-            return state.notes.length - 1
-        }
+        return _.findIndex(state.notes, function (_note) {
+            return _note.index === note.index
+        })
     }
 
     return {
@@ -28,7 +24,22 @@ var AppStore = angular.module('app.stores', ['flux'])
             'addNote': 'addNote',
             'saveNote': 'saveNote',
             'setNotes': 'setNotes',
-            'selectNote': 'selectNote'
+            'selectNote': 'selectNote',
+            'addNote': 'addNote'
+        },
+        addNote: function () {
+            let currentMaxId = _.max(state.notes, function (_note) {
+                return _note.id
+            }) || 0
+
+            let note = {
+                id: currentMaxId + 1,
+                title: '',
+                content: ''
+            }
+
+            state = state.notes.unshift(note)
+            this.editNote(note)
         },
         selectNote: function (note) {
             let index = findIndex(note)
@@ -47,6 +58,7 @@ var AppStore = angular.module('app.stores', ['flux'])
             this.emitChange()
         },
         saveNote: function (note) {
+            note.summary = Utils.truncate(note.content, 30)
             state = state.notes.splice(state.selectedIndex, 1, note)
             state = state.set('selectedNote', note)
             this.emitChange()

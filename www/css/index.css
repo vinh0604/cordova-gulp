@@ -4860,38 +4860,75 @@ html {
   display: inline-block;
   border-right: solid 1px #e5e5e5; }
   /* line 20, stdin */
+  .sidebar__topbar {
+    padding: 10px;
+    display: flex; }
+    /* line 24, stdin */
+    .sidebar__topbar__search-widget {
+      vertical-align: middle;
+      white-space: nowrap;
+      position: relative;
+      width: 145px; }
+      /* line 30, stdin */
+      .sidebar__topbar__search-widget input[type="text"] {
+        border-radius: 5px;
+        border: solid 1px #e5e5e5;
+        padding: 10px 10px 10px 30px;
+        box-sizing: border-box;
+        width: 100%; }
+        /* line 37, stdin */
+        .sidebar__topbar__search-widget input[type="text"]:focus {
+          border-color: #969696;
+          outline-color: transparent;
+          outline-style: none; }
+      /* line 44, stdin */
+      .sidebar__topbar__search-widget i {
+        position: absolute;
+        top: 11px;
+        left: 11px; }
+    /* line 51, stdin */
+    .sidebar__topbar__add-button {
+      border: none;
+      text-align: center;
+      background: transparent;
+      width: 40px; }
+      /* line 57, stdin */
+      .sidebar__topbar__add-button:focus {
+        outline-color: transparent;
+        outline-style: none; }
+  /* line 64, stdin */
   .sidebar__list {
     padding: 0;
     margin: 0; }
-  /* line 25, stdin */
+  /* line 69, stdin */
   .sidebar__item {
     border-bottom: solid 1px #e5e5e5;
     padding: 5px 10px;
     color: #6e6e6e;
     line-height: 20px; }
-    /* line 31, stdin */
+    /* line 75, stdin */
     .sidebar__item__title {
       font-weight: 600;
       margin: 0; }
-      /* line 34, stdin */
+      /* line 78, stdin */
       .sidebar__item__title a {
         color: #2b2b2b;
         text-decoration: none; }
-    /* line 40, stdin */
+    /* line 84, stdin */
     .sidebar__item p {
       margin: 0; }
 
-/* line 46, stdin */
+/* line 90, stdin */
 .main {
   margin: 0 10px;
   width: calc(100% - 210px);
   display: inline-block;
   line-height: 20px; }
-  /* line 52, stdin */
+  /* line 96, stdin */
   .main__title {
     margin: 10px 0;
     font-size: 2rem; }
-  /* line 58, stdin */
+  /* line 102, stdin */
   .main__form__input-title {
     font-size: 2rem;
     padding: 2px;
@@ -4901,18 +4938,18 @@ html {
     display: block;
     width: 100%;
     margin: 10px 0; }
-    /* line 68, stdin */
+    /* line 112, stdin */
     .main__form__input-title:focus {
       border-bottom: solid 1px #969696;
       outline-color: transparent;
       outline-style: none; }
-  /* line 75, stdin */
+  /* line 119, stdin */
   .main__form__input-content {
     border: none;
     display: block;
     width: 100%;
     resize: none; }
-    /* line 81, stdin */
+    /* line 125, stdin */
     .main__form__input-content:focus {
       outline-color: transparent;
       outline-style: none; }

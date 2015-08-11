@@ -1,6 +1,6 @@
 <div>
   <h4 class="sidebar__item__title">
-    <a href="#" ng-click="selectNote($event, note)">{{note.title}}</a>
+    <a href="#" ng-click="selectNote($event, note)">{{note.title || 'New Note'}}</a>
   </h4>
   <p>{{note.summary}}</p>
 </div>

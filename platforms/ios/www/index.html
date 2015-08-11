@@ -11,7 +11,10 @@
 <body>
   <div id="main">
     <div ng-controller="MainCtrl as main" class="container">
-      <note-list class="sidebar"></note-list>
+      <div class="sidebar">
+        <top-bar></top-bar>
+        <note-list></note-list>
+      </div>
       <main-panel class="main"></main-panel>
     </div>
   </div>

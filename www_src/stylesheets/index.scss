@@ -17,6 +17,50 @@ html {
   display: inline-block;
   border-right: solid 1px $light-gray;
 
+  &__topbar {
+    padding: 10px;
+    display: flex;
+
+    &__search-widget {
+      vertical-align: middle;
+      white-space: nowrap;
+      position: relative;
+      width: 145px;
+
+      input[type="text"] {
+        border-radius: 5px;
+        border: solid 1px $light-gray;
+        padding: 10px 10px 10px 30px;
+        box-sizing: border-box;
+        width: 100%;
+
+        &:focus {
+          border-color: $light-black;
+          outline-color: transparent;
+          outline-style: none;
+        }
+      }
+
+      i {
+        position: absolute;
+        top: 11px;
+        left: 11px;
+      }
+    }
+
+    &__add-button {
+      border: none;
+      text-align: center;
+      background: transparent;
+      width: 40px;
+
+      &:focus {
+        outline-color: transparent;
+        outline-style: none;
+      }
+    }
+  }
+
   &__list {
     padding: 0;
     margin: 0;
@@ -66,7 +110,7 @@ html {
       margin: 10px 0;
 
       &:focus {
-        border-bottom: solid 1px #969696;
+        border-bottom: solid 1px $light-black;
         outline-color: transparent;
         outline-style: none;
       }

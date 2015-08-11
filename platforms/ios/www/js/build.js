@@ -76885,9 +76885,11 @@ exports['default'] = ['flux', function NoteForm(flux) {
             note: '='
         },
         link: function link(scope, elem, attrs) {
-            setTimeout(function () {
-                (0, _autosize2['default'])(elem[0].querySelectorAll('#content'));
-            }, 0);
+            var contentElem = elem[0].querySelector('#content');
+
+            contentElem.addEventListener('focus', function () {
+                (0, _autosize2['default'])(contentElem);
+            });
         },
         controller: function controller($scope) {
             $scope.saveNote = function ($event) {
@@ -76997,6 +76999,29 @@ module.exports = exports['default'];
 Object.defineProperty(exports, '__esModule', {
     value: true
 });
+exports['default'] = ['flux', function TopBar(flux) {
+    return {
+        replace: true,
+        templateUrl: 'templates/TopBar.html',
+        restrict: 'E',
+        link: function link(scope, element, attr) {
+            scope.keyword = '';
+        },
+        controller: function controller($scope) {
+            $scope.addNote = function () {
+                flux.dispatch('addNote');
+            };
+        }
+    };
+}];
+module.exports = exports['default'];
+
+},{}],30:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
@@ -77034,14 +77059,18 @@ var _NoteForm = require('./NoteForm');
 
 var _NoteForm2 = _interopRequireDefault(_NoteForm);
 
+var _TopBar = require('./TopBar');
+
+var _TopBar2 = _interopRequireDefault(_TopBar);
+
 var AppDirective = _angular2['default'].module('app.directives', [_angularSanitize2['default'], _storesIndex2['default'], 'flux']);
 
-AppDirective.directive('noteList', _NoteList2['default']).directive('noteLine', _NoteLine2['default']).directive('mainPanel', _MainPanel2['default']).directive('noteView', _NoteView2['default']).directive('noteForm', _NoteForm2['default']);
+AppDirective.directive('noteList', _NoteList2['default']).directive('noteLine', _NoteLine2['default']).directive('mainPanel', _MainPanel2['default']).directive('noteView', _NoteView2['default']).directive('noteForm', _NoteForm2['default']).directive('topBar', _TopBar2['default']);
 
 exports['default'] = AppDirective = AppDirective.name;
 module.exports = exports['default'];
 
-},{"../stores/index":31,"./MainPanel":24,"./NoteForm":25,"./NoteLine":26,"./NoteList":27,"./NoteView":28,"angular":4,"angular-sanitize":2,"flux-angular":20}],30:[function(require,module,exports){
+},{"../stores/index":32,"./MainPanel":24,"./NoteForm":25,"./NoteLine":26,"./NoteList":27,"./NoteView":28,"./TopBar":29,"angular":4,"angular-sanitize":2,"flux-angular":20}],31:[function(require,module,exports){
 'use strict';
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
@@ -77080,7 +77109,7 @@ app.controller('MainCtrl', ['flux', '$timeout', function (flux, $timeout) {
 
 _angular2['default'].bootstrap(document.getElementById('main'), ['app']);
 
-},{"./directives/index":29,"angular":4,"d3":6}],31:[function(require,module,exports){
+},{"./directives/index":30,"angular":4,"d3":6}],32:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -77099,6 +77128,10 @@ var _angular2 = _interopRequireDefault(_angular);
 
 require('flux-angular');
 
+var _utils = require('./../utils');
+
+var _utils2 = _interopRequireDefault(_utils);
+
 var AppStore = _angular2['default'].module('app.stores', ['flux']).store('NoteStore', function (flux) {
     var state = flux.immutable({
         notes: [],
@@ -77108,14 +77141,9 @@ var AppStore = _angular2['default'].module('app.stores', ['flux']).store('NoteSt
     });
 
     var findIndex = function findIndex(note) {
-        if (note.id) {
-            return _lodash2['default'].findIndex(state.notes, function (_note) {
-                return _note.index === note.index;
-            });
-        } else {
-            state = state.notes.push(note);
-            return state.notes.length - 1;
-        }
+        return _lodash2['default'].findIndex(state.notes, function (_note) {
+            return _note.index === note.index;
+        });
     };
 
     return {
@@ -77124,7 +77152,22 @@ var AppStore = _angular2['default'].module('app.stores', ['flux']).store('NoteSt
             'addNote': 'addNote',
             'saveNote': 'saveNote',
             'setNotes': 'setNotes',
-            'selectNote': 'selectNote'
+            'selectNote': 'selectNote',
+            'addNote': 'addNote'
+        },
+        addNote: function addNote() {
+            var currentMaxId = _lodash2['default'].max(state.notes, function (_note) {
+                return _note.id;
+            }) || 0;
+
+            var note = {
+                id: currentMaxId + 1,
+                title: '',
+                content: ''
+            };
+
+            state = state.notes.unshift(note);
+            this.editNote(note);
         },
         selectNote: function selectNote(note) {
             var index = findIndex(note);
@@ -77143,6 +77186,7 @@ var AppStore = _angular2['default'].module('app.stores', ['flux']).store('NoteSt
             this.emitChange();
         },
         saveNote: function saveNote(note) {
+            note.summary = _utils2['default'].truncate(note.content, 20);
             state = state.notes.splice(state.selectedIndex, 1, note);
             state = state.set('selectedNote', note);
             this.emitChange();
@@ -77168,7 +77212,32 @@ var AppStore = _angular2['default'].module('app.stores', ['flux']).store('NoteSt
 exports['default'] = AppStore = AppStore.name;
 module.exports = exports['default'];
 
-},{"angular":4,"flux-angular":20,"lodash":22}]},{},[30])
+},{"./../utils":33,"angular":4,"flux-angular":20,"lodash":22}],33:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+exports['default'] = {
+    truncate: function truncate(str, length) {
+        length = length || 80;
+
+        if (length < str.length) {
+            var rawTruncatedStr = str.substr(0, length);
+            var whitespaceIndex = str.lastIndexOf(' ');
+
+            if (whitespaceIndex > -1) {
+                rawTruncatedStr = rawTruncatedStr.substr(0, rawTruncatedStr.lastIndexOf(' '));
+            }
+            return rawTruncatedStr + '...';
+        } else {
+            return str;
+        }
+    }
+};
+module.exports = exports['default'];
+
+},{}]},{},[31])
 
 
 //# sourceMappingURL=build.js.map

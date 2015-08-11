@@ -2245,7 +2245,7 @@ html {
 
 /* line 45, stdin */
 .main {
-  margin-left: 10px;
+  margin: 0 10px;
   width: calc(100% - 210px);
   display: inline-block;
   line-height: 20px; }
@@ -2253,3 +2253,21 @@ html {
   .main__title {
     margin: 10px 0;
     font-size: 2rem; }
+  /* line 57, stdin */
+  .main__form__input-title {
+    font-size: 2rem;
+    padding: 2px;
+    border: none;
+    border-bottom: solid 1px #e5e5e5;
+    transition: border 0.3s;
+    display: block;
+    width: 100%;
+    margin: 10px 0; }
+    /* line 67, stdin */
+    .main__form__input-title:focus {
+      border-bottom: solid 1px #969696; }
+  /* line 72, stdin */
+  .main__form__input-content {
+    border: none;
+    display: block;
+    width: 100%; }

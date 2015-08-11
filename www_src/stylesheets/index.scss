@@ -43,7 +43,7 @@ html {
 }
 
 .main {
-  margin-left: 10px;
+  margin: 0 10px;
   width: calc(100% - 210px);
   display: inline-block;
   line-height: 20px;
@@ -51,5 +51,28 @@ html {
   &__title {
     margin: 10px 0;
     font-size: 2rem;
+  }
+
+  &__form {
+    &__input-title {
+      font-size: 2rem;
+      padding: 2px;
+      border: none;
+      border-bottom: solid 1px $light-gray;
+      transition: border 0.3s;
+      display: block;
+      width: 100%;
+      margin: 10px 0;
+
+      &:focus {
+        border-bottom: solid 1px #969696;
+      }
+    }
+
+    &__input-content {
+      border: none;
+      display: block;
+      width: 100%;
+    }
   }
 }

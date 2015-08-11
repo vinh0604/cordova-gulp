@@ -1,4 +1,4 @@
 <div>
-  <h4>{{note.title}}</h4>
-  <p ng-bind-html="note.content"></p>
+  <h4 ng-click="clickHandle()">{{note.title}}</h4>
+  <p ng-click="clickHandle()" ng-bind-html="mdToHtml(note.content)"></p>
 </div>

@@ -1,5 +1,6 @@
 import angular from 'angular'
 import directives from './directives/index'
+import d3 from 'd3'
 
 var app = angular.module('app', [directives])
 
@@ -18,7 +19,10 @@ app.controller('MainCtrl', ['flux', '$timeout', function (flux, $timeout) {
     ]
     $timeout(function() {
         flux.dispatch('setNotes', notes)
+        flux.dispatch('selectNote', notes[0])
     }, 0);
 }])
 
 angular.bootstrap(document.getElementById('main'), ['app'])
+
+

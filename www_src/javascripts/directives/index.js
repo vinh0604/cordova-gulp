@@ -7,6 +7,7 @@ import NoteLine from './NoteLine'
 import MainPanel from './MainPanel'
 import NoteView from './NoteView'
 import NoteForm from './NoteForm'
+import TopBar from './TopBar'
 
 var AppDirective = angular.module('app.directives', [ngSanitize, AppStore, 'flux'])
 
@@ -15,5 +16,6 @@ AppDirective.directive('noteList', NoteList)
     .directive('mainPanel', MainPanel)
     .directive('noteView', NoteView)
     .directive('noteForm', NoteForm)
+    .directive('topBar', TopBar)
 
 export default AppDirective = AppDirective.name

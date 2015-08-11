@@ -1,6 +1,6 @@
 import autosize from 'autosize'
 
-export default function NoteForm () {
+export default ['flux', function NoteForm (flux) {
     return {
         replace: true,
         restrict: 'E',
@@ -9,7 +9,24 @@ export default function NoteForm () {
             note: '='
         },
         link: function (scope, elem, attrs) {
-            autosize(elem[0].querySelectorAll('#content'))
+            let contentElem = elem[0].querySelector('#content')
+
+            contentElem.addEventListener('focus', function () {
+                autosize(contentElem)
+            })
+        },
+        controller: function ($scope) {
+            $scope.saveNote = function ($event) {
+                $event.preventDefault()
+                flux.dispatch('saveNote', $scope.note)
+            }
+
+            $scope.enterToSaveNote = function ($event) {
+                if ($event.keyCode === 13) {
+                    $event.preventDefault()
+                    $scope.saveNote($event)
+                }
+            }
         }
     }
-}
+}]

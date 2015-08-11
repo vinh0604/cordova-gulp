@@ -11,7 +11,8 @@ export default ['flux', function NoteLine (flux) {
                 flux.dispatch('editNote', note)
             }
 
-            scope.selectNote = function (note) {
+            scope.selectNote = function ($event, note) {
+                $event.preventDefault()
                 flux.dispatch('selectNote', note)
             }
         }

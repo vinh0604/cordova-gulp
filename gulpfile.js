@@ -55,6 +55,9 @@ gulp.task('copy-assets', function () {
     gulp.src('www_src/img/**/*')
         .pipe(gulp.dest('./www/img'))
 
+    gulp.src('node_modules/font-awesome/fonts/*')
+        .pipe(gulp.dest('./www/fonts'))
+
     gulp.src('www_src/index.html')
         .pipe(gulp.dest('./www'))
 

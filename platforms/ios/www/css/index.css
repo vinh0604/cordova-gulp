@@ -2206,3 +2206,75 @@ https://github.com/yahoo/pure/blob/master/LICENSE.md
   .pure-u-xl-5-5,
   .pure-u-xl-24-24 {
     width: 100%; } }
+
+/* line 5, stdin */
+html {
+  font-size: 12px; }
+
+/* line 9, stdin */
+.container {
+  display: flex;
+  align-items: flex-start; }
+
+/* line 14, stdin */
+.sidebar {
+  width: 200px;
+  display: inline-block;
+  border-right: solid 1px #e5e5e5; }
+  /* line 19, stdin */
+  .sidebar__list {
+    padding: 0;
+    margin: 0; }
+  /* line 24, stdin */
+  .sidebar__item {
+    border-bottom: solid 1px #e5e5e5;
+    padding: 5px 10px;
+    color: #6e6e6e;
+    line-height: 20px; }
+    /* line 30, stdin */
+    .sidebar__item__title {
+      font-weight: 600;
+      margin: 0; }
+      /* line 33, stdin */
+      .sidebar__item__title a {
+        color: #2b2b2b;
+        text-decoration: none; }
+    /* line 39, stdin */
+    .sidebar__item p {
+      margin: 0; }
+
+/* line 45, stdin */
+.main {
+  margin: 0 10px;
+  width: calc(100% - 210px);
+  display: inline-block;
+  line-height: 20px; }
+  /* line 51, stdin */
+  .main__title {
+    margin: 10px 0;
+    font-size: 2rem; }
+  /* line 57, stdin */
+  .main__form__input-title {
+    font-size: 2rem;
+    padding: 2px;
+    border: none;
+    border-bottom: solid 1px #e5e5e5;
+    transition: border 0.3s;
+    display: block;
+    width: 100%;
+    margin: 10px 0; }
+    /* line 67, stdin */
+    .main__form__input-title:focus {
+      border-bottom: solid 1px #969696;
+      outline-color: transparent;
+      outline-style: none; }
+  /* line 74, stdin */
+  .main__form__input-content {
+    border: none;
+    display: block;
+    width: 100%;
+    resize: none; }
+    /* line 80, stdin */
+    .main__form__input-content:focus {
+      outline-color: transparent;
+      outline-style: none; }

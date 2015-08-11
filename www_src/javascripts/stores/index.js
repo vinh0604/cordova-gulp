@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import angular from 'angular'
 import 'flux-angular'
 
@@ -6,8 +7,20 @@ var AppStore = angular.module('app.stores', ['flux'])
     var state = flux.immutable({
         notes: [],
         selectedNote: { title: '', content: '' },
-        editMode: false
+        editMode: false,
+        selectedIndex: -1
     })
+
+    var findIndex = function (note) {
+        if (note.id) {
+            return _.findIndex(state.notes, function (_note) {
+                return _note.index === note.index
+            })
+        } else {
+            state = state.notes.push(note)
+            return state.notes.length - 1
+        }
+    }
 
     return {
         handlers: {
@@ -18,13 +31,24 @@ var AppStore = angular.module('app.stores', ['flux'])
             'selectNote': 'selectNote'
         },
         selectNote: function (note) {
+            let index = findIndex(note)
+
             state = state.set('selectedNote', note)
             state = state.set('editMode', false)
+            state = state.set('selectedIndex', index)
             this.emitChange()
         },
         editNote: function (note) {
+            let index = findIndex(note)
+
             state = state.set('selectedNote', note)
             state = state.set('editMode', true)
+            state = state.set('selectedIndex', index)
+            this.emitChange()
+        },
+        saveNote: function (note) {
+            state = state.notes.splice(state.selectedIndex, 1, note)
+            state = state.set('selectedNote', note)
             this.emitChange()
         },
         setNotes: function (notes) {

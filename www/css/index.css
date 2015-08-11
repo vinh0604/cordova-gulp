@@ -2265,9 +2265,16 @@ html {
     margin: 10px 0; }
     /* line 67, stdin */
     .main__form__input-title:focus {
-      border-bottom: solid 1px #969696; }
-  /* line 72, stdin */
+      border-bottom: solid 1px #969696;
+      outline-color: transparent;
+      outline-style: none; }
+  /* line 74, stdin */
   .main__form__input-content {
     border: none;
     display: block;
-    width: 100%; }
+    width: 100%;
+    resize: none; }
+    /* line 80, stdin */
+    .main__form__input-content:focus {
+      outline-color: transparent;
+      outline-style: none; }

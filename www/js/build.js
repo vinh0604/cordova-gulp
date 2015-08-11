@@ -29057,6 +29057,221 @@ require('./angular');
 module.exports = angular;
 
 },{"./angular":3}],5:[function(require,module,exports){
+/*!
+	Autosize 3.0.8
+	license: MIT
+	http://www.jacklmoore.com/autosize
+*/
+(function (global, factory) {
+	if (typeof define === 'function' && define.amd) {
+		define(['exports', 'module'], factory);
+	} else if (typeof exports !== 'undefined' && typeof module !== 'undefined') {
+		factory(exports, module);
+	} else {
+		var mod = {
+			exports: {}
+		};
+		factory(mod.exports, mod);
+		global.autosize = mod.exports;
+	}
+})(this, function (exports, module) {
+	'use strict';
+
+	function assign(ta) {
+		var _ref = arguments[1] === undefined ? {} : arguments[1];
+
+		var _ref$setOverflowX = _ref.setOverflowX;
+		var setOverflowX = _ref$setOverflowX === undefined ? true : _ref$setOverflowX;
+		var _ref$setOverflowY = _ref.setOverflowY;
+		var setOverflowY = _ref$setOverflowY === undefined ? true : _ref$setOverflowY;
+
+		if (!ta || !ta.nodeName || ta.nodeName !== 'TEXTAREA' || ta.hasAttribute('data-autosize-on')) return;
+
+		var heightOffset = null;
+		var overflowY = 'hidden';
+
+		function init() {
+			var style = window.getComputedStyle(ta, null);
+
+			if (style.resize === 'vertical') {
+				ta.style.resize = 'none';
+			} else if (style.resize === 'both') {
+				ta.style.resize = 'horizontal';
+			}
+
+			if (style.boxSizing === 'content-box') {
+				heightOffset = -(parseFloat(style.paddingTop) + parseFloat(style.paddingBottom));
+			} else {
+				heightOffset = parseFloat(style.borderTopWidth) + parseFloat(style.borderBottomWidth);
+			}
+
+			update();
+		}
+
+		function changeOverflow(value) {
+			{
+				// Chrome/Safari-specific fix:
+				// When the textarea y-overflow is hidden, Chrome/Safari do not reflow the text to account for the space
+				// made available by removing the scrollbar. The following forces the necessary text reflow.
+				var width = ta.style.width;
+				ta.style.width = '0px';
+				// Force reflow:
+				/* jshint ignore:start */
+				ta.offsetWidth;
+				/* jshint ignore:end */
+				ta.style.width = width;
+			}
+
+			overflowY = value;
+
+			if (setOverflowY) {
+				ta.style.overflowY = value;
+			}
+
+			resize();
+		}
+
+		function resize() {
+			var htmlTop = window.pageYOffset;
+			var bodyTop = document.body.scrollTop;
+			var originalHeight = ta.style.height;
+
+			ta.style.height = 'auto';
+
+			var endHeight = ta.scrollHeight + heightOffset;
+
+			if (ta.scrollHeight === 0) {
+				// If the scrollHeight is 0, then the element probably has display:none or is detached from the DOM.
+				ta.style.height = originalHeight;
+				return;
+			}
+
+			ta.style.height = endHeight + 'px';
+
+			// prevents scroll-position jumping
+			document.documentElement.scrollTop = htmlTop;
+			document.body.scrollTop = bodyTop;
+		}
+
+		function update() {
+			var startHeight = ta.style.height;
+
+			resize();
+
+			var style = window.getComputedStyle(ta, null);
+
+			if (style.height !== ta.style.height) {
+				if (overflowY !== 'visible') {
+					changeOverflow('visible');
+				}
+			} else {
+				if (overflowY !== 'hidden') {
+					changeOverflow('hidden');
+				}
+			}
+
+			if (startHeight !== ta.style.height) {
+				var evt = document.createEvent('Event');
+				evt.initEvent('autosize:resized', true, false);
+				ta.dispatchEvent(evt);
+			}
+		}
+
+		var destroy = (function (style) {
+			window.removeEventListener('resize', update);
+			ta.removeEventListener('input', update);
+			ta.removeEventListener('keyup', update);
+			ta.removeAttribute('data-autosize-on');
+			ta.removeEventListener('autosize:destroy', destroy);
+
+			Object.keys(style).forEach(function (key) {
+				ta.style[key] = style[key];
+			});
+		}).bind(ta, {
+			height: ta.style.height,
+			resize: ta.style.resize,
+			overflowY: ta.style.overflowY,
+			overflowX: ta.style.overflowX,
+			wordWrap: ta.style.wordWrap });
+
+		ta.addEventListener('autosize:destroy', destroy);
+
+		// IE9 does not fire onpropertychange or oninput for deletions,
+		// so binding to onkeyup to catch most of those events.
+		// There is no way that I know of to detect something like 'cut' in IE9.
+		if ('onpropertychange' in ta && 'oninput' in ta) {
+			ta.addEventListener('keyup', update);
+		}
+
+		window.addEventListener('resize', update);
+		ta.addEventListener('input', update);
+		ta.addEventListener('autosize:update', update);
+		ta.setAttribute('data-autosize-on', true);
+
+		if (setOverflowY) {
+			ta.style.overflowY = 'hidden';
+		}
+		if (setOverflowX) {
+			ta.style.overflowX = 'hidden';
+			ta.style.wordWrap = 'break-word';
+		}
+
+		init();
+	}
+
+	function destroy(ta) {
+		if (!(ta && ta.nodeName && ta.nodeName === 'TEXTAREA')) return;
+		var evt = document.createEvent('Event');
+		evt.initEvent('autosize:destroy', true, false);
+		ta.dispatchEvent(evt);
+	}
+
+	function update(ta) {
+		if (!(ta && ta.nodeName && ta.nodeName === 'TEXTAREA')) return;
+		var evt = document.createEvent('Event');
+		evt.initEvent('autosize:update', true, false);
+		ta.dispatchEvent(evt);
+	}
+
+	var autosize = null;
+
+	// Do nothing in Node.js environment and IE8 (or lower)
+	if (typeof window === 'undefined' || typeof window.getComputedStyle !== 'function') {
+		autosize = function (el) {
+			return el;
+		};
+		autosize.destroy = function (el) {
+			return el;
+		};
+		autosize.update = function (el) {
+			return el;
+		};
+	} else {
+		autosize = function (el, options) {
+			if (el) {
+				Array.prototype.forEach.call(el.length ? el : [el], function (x) {
+					return assign(x, options);
+				});
+			}
+			return el;
+		};
+		autosize.destroy = function (el) {
+			if (el) {
+				Array.prototype.forEach.call(el.length ? el : [el], destroy);
+			}
+			return el;
+		};
+		autosize.update = function (el) {
+			if (el) {
+				Array.prototype.forEach.call(el.length ? el : [el], update);
+			}
+			return el;
+		};
+	}
+
+	module.exports = autosize;
+});
+},{}],6:[function(require,module,exports){
 !function() {
   var d3 = {
     version: "3.5.6"
@@ -38561,7 +38776,7 @@ module.exports = angular;
   if (typeof define === "function" && define.amd) define(d3); else if (typeof module === "object" && module.exports) module.exports = d3;
   this.d3 = d3;
 }();
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 /**
  * @license AngularJS v1.2.28
  * (c) 2010-2014 Google, Inc. http://angularjs.org
@@ -60716,14 +60931,14 @@ var styleDirective = valueFn({
 })(window, document);
 
 !window.angular.$$csp() && window.angular.element(document).find('head').prepend('<style type="text/css">@charset "UTF-8";[ng\\:cloak],[ng-cloak],[data-ng-cloak],[x-ng-cloak],.ng-cloak,.x-ng-cloak,.ng-hide{display:none !important;}ng\\:form{display:block;}.ng-animate-block-transitions{transition:0s all!important;-webkit-transition:0s all!important;}.ng-hide-add-active,.ng-hide-remove{display:block!important;}</style>');
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 /**
  * Copyright 2014, Yahoo! Inc.
  * Copyrights licensed under the New BSD License. See the accompanying LICENSE file for terms.
  */
 module.exports = require('./lib/Dispatcher');
 
-},{"./lib/Dispatcher":9}],8:[function(require,module,exports){
+},{"./lib/Dispatcher":10}],9:[function(require,module,exports){
 /**
  * Copyright 2014, Yahoo! Inc.
  * Copyrights licensed under the New BSD License. See the accompanying LICENSE file for terms.
@@ -60824,7 +61039,7 @@ Action.prototype.waitFor = function waitFor(stores, callback) {
 
 module.exports = Action;
 
-},{"debug":10}],9:[function(require,module,exports){
+},{"debug":11}],10:[function(require,module,exports){
 /**
  * Copyright 2014, Yahoo! Inc.
  * Copyrights licensed under the New BSD License. See the accompanying LICENSE file for terms.
@@ -61077,7 +61292,7 @@ module.exports = function () {
     return Dispatcher;
 };
 
-},{"./Action":8,"debug":10}],10:[function(require,module,exports){
+},{"./Action":9,"debug":11}],11:[function(require,module,exports){
 
 /**
  * This is the web browser implementation of `debug()`.
@@ -61247,7 +61462,7 @@ function localstorage(){
   } catch (e) {}
 }
 
-},{"./debug":11}],11:[function(require,module,exports){
+},{"./debug":12}],12:[function(require,module,exports){
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -61446,7 +61661,7 @@ function coerce(val) {
   return val;
 }
 
-},{"ms":12}],12:[function(require,module,exports){
+},{"ms":13}],13:[function(require,module,exports){
 /**
  * Helpers.
  */
@@ -61573,7 +61788,7 @@ function plural(ms, n, name) {
   return Math.ceil(ms / n) + ' ' + name + 's';
 }
 
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 /*!
  * EventEmitter2
  * https://github.com/hij1nx/EventEmitter2
@@ -62148,7 +62363,7 @@ function plural(ms, n, name) {
   }
 }();
 
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 var utils = require('./utils.js');
 
 module.exports = function (helpers) {
@@ -62211,7 +62426,7 @@ module.exports = function (helpers) {
 
 };
 
-},{"./utils.js":18}],15:[function(require,module,exports){
+},{"./utils.js":19}],16:[function(require,module,exports){
 'use strict';
 var StoreArray = require('./StoreArray.js');
 var StoreObject = require('./StoreObject.js');
@@ -62409,7 +62624,7 @@ function Store(state) {
 
 module.exports = Store;
 
-},{"./Mapper.js":14,"./StoreArray.js":16,"./StoreObject.js":17,"./utils.js":18}],16:[function(require,module,exports){
+},{"./Mapper.js":15,"./StoreArray.js":17,"./StoreObject.js":18,"./utils.js":19}],17:[function(require,module,exports){
 'use strict';
 var utils = require('./utils.js');
 var StoreArray = function () {
@@ -62523,7 +62738,7 @@ var StoreArray = function () {
 
 module.exports = StoreArray();
 
-},{"./utils.js":18}],17:[function(require,module,exports){
+},{"./utils.js":19}],18:[function(require,module,exports){
 'use strict';
 var utils = require('./utils.js');
 var Mapper = require('./Mapper.js');
@@ -62605,7 +62820,7 @@ var StoreObject = function () {
 
 module.exports = StoreObject();
 
-},{"./Mapper.js":14,"./utils.js":18}],18:[function(require,module,exports){
+},{"./Mapper.js":15,"./utils.js":19}],19:[function(require,module,exports){
 "use strict";
 var utils = {
   toJS: function (obj) {
@@ -62677,7 +62892,7 @@ var utils = {
 
 module.exports = utils;
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -62920,7 +63135,7 @@ angular.module('flux', [])
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
-},{"./safeDeepClone.js":20,"angular":6,"dispatchr":7,"eventemitter2":13,"immutable-store":15}],20:[function(require,module,exports){
+},{"./safeDeepClone.js":21,"angular":7,"dispatchr":8,"eventemitter2":14,"immutable-store":16}],21:[function(require,module,exports){
 (function (global){
 var angular = global.angular || require('angular') && global.angular;
 function safeDeepClone(circularValue, refs, obj) {
@@ -62979,7 +63194,7 @@ module.exports = safeDeepClone;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
-},{"angular":6}],21:[function(require,module,exports){
+},{"angular":7}],22:[function(require,module,exports){
 (function (global){
 /**
  * marked - a markdown parser
@@ -64269,7 +64484,7 @@ if (typeof module !== 'undefined' && typeof exports === 'object') {
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -64292,13 +64507,19 @@ exports['default'] = ['NoteStore', function MainPanel(NoteStore) {
 }];
 module.exports = exports['default'];
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
     value: true
 });
 exports['default'] = NoteForm;
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _autosize = require('autosize');
+
+var _autosize2 = _interopRequireDefault(_autosize);
 
 function NoteForm() {
     return {
@@ -64307,13 +64528,16 @@ function NoteForm() {
         templateUrl: 'templates/NoteForm.html',
         scope: {
             note: '='
+        },
+        link: function link(scope, elem, attrs) {
+            (0, _autosize2['default'])(elem[0].querySelectorAll('#content'));
         }
     };
 }
 
 module.exports = exports['default'];
 
-},{}],24:[function(require,module,exports){
+},{"autosize":5}],25:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -64340,7 +64564,7 @@ exports['default'] = ['flux', function NoteLine(flux) {
 }];
 module.exports = exports['default'];
 
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -64361,7 +64585,7 @@ exports['default'] = ['NoteStore', function NoteList(NoteStore) {
 }];
 module.exports = exports['default'];
 
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -64397,7 +64621,7 @@ exports['default'] = ['flux', function NoteView(flux) {
 }];
 module.exports = exports['default'];
 
-},{"flux-angular":19,"marked":21}],27:[function(require,module,exports){
+},{"flux-angular":20,"marked":22}],28:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -64447,7 +64671,7 @@ AppDirective.directive('noteList', _NoteList2['default']).directive('noteLine', 
 exports['default'] = AppDirective = AppDirective.name;
 module.exports = exports['default'];
 
-},{"../stores/index":29,"./MainPanel":22,"./NoteForm":23,"./NoteLine":24,"./NoteList":25,"./NoteView":26,"angular":4,"angular-sanitize":2,"flux-angular":19}],28:[function(require,module,exports){
+},{"../stores/index":30,"./MainPanel":23,"./NoteForm":24,"./NoteLine":25,"./NoteList":26,"./NoteView":27,"angular":4,"angular-sanitize":2,"flux-angular":20}],29:[function(require,module,exports){
 'use strict';
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
@@ -64484,7 +64708,7 @@ app.controller('MainCtrl', ['flux', '$timeout', function (flux, $timeout) {
 
 _angular2['default'].bootstrap(document.getElementById('main'), ['app']);
 
-},{"./directives/index":27,"angular":4,"d3":5}],29:[function(require,module,exports){
+},{"./directives/index":28,"angular":4,"d3":6}],30:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -64545,7 +64769,7 @@ var AppStore = _angular2['default'].module('app.stores', ['flux']).store('NoteSt
 exports['default'] = AppStore = AppStore.name;
 module.exports = exports['default'];
 
-},{"angular":4,"flux-angular":19}]},{},[28])
+},{"angular":4,"flux-angular":20}]},{},[29])
 
 
 //# sourceMappingURL=build.js.map

@@ -66,6 +66,8 @@ html {
 
       &:focus {
         border-bottom: solid 1px #969696;
+        outline-color: transparent;
+        outline-style: none;
       }
     }
 
@@ -73,6 +75,12 @@ html {
       border: none;
       display: block;
       width: 100%;
+      resize: none;
+
+      &:focus {
+        outline-color: transparent;
+        outline-style: none;
+      }
     }
   }
 }

@@ -1,5 +1,5 @@
 <ul class="sidebar__list">
-  <li ng-repeat="note in notes" class="sidebar__item">
+  <li ng-repeat="note in notes" class="sidebar__item" tabindex="{{$index}}" ng-class="{'sidebar__item--selected': selectedNote.id === note.id}" ng-focus="selectNote($event, note)">
     <note-line note="note"/>
   </li>
 </ul>

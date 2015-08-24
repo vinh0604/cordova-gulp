@@ -84,6 +84,10 @@ html {
     p {
       margin: 0;
     }
+
+    &--selected {
+      background-color: antiquewhite;
+    }
   }
 }
 

@@ -1,6 +1,5 @@
 import angular from 'angular'
 import directives from './directives/index'
-import d3 from 'd3'
 
 var app = angular.module('app', [directives])
 

@@ -4917,18 +4917,21 @@ html {
     /* line 84, stdin */
     .sidebar__item p {
       margin: 0; }
+    /* line 88, stdin */
+    .sidebar__item--selected {
+      background-color: antiquewhite; }
 
-/* line 90, stdin */
+/* line 94, stdin */
 .main {
   margin: 0 10px;
   width: calc(100% - 210px);
   display: inline-block;
   line-height: 20px; }
-  /* line 96, stdin */
+  /* line 100, stdin */
   .main__title {
     margin: 10px 0;
     font-size: 2rem; }
-  /* line 102, stdin */
+  /* line 106, stdin */
   .main__form__input-title {
     font-size: 2rem;
     padding: 2px;
@@ -4938,18 +4941,18 @@ html {
     display: block;
     width: 100%;
     margin: 10px 0; }
-    /* line 112, stdin */
+    /* line 116, stdin */
     .main__form__input-title:focus {
       border-bottom: solid 1px #969696;
       outline-color: transparent;
       outline-style: none; }
-  /* line 119, stdin */
+  /* line 123, stdin */
   .main__form__input-content {
     border: none;
     display: block;
     width: 100%;
     resize: none; }
-    /* line 125, stdin */
+    /* line 129, stdin */
     .main__form__input-content:focus {
       outline-color: transparent;
       outline-style: none; }

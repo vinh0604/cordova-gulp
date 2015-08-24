@@ -1,20 +1,10 @@
-export default ['flux', function NoteLine (flux) {
+export default function NoteLine (flux) {
     return {
         replace: true,
         templateUrl: 'templates/NoteLine.html',
         restrict: 'E',
         scope: {
             note: '='
-        },
-        link: function (scope, element, attr) {
-            scope.editNote = function (note) {
-                flux.dispatch('editNote', note)
-            }
-
-            scope.selectNote = function ($event, note) {
-                $event.preventDefault()
-                flux.dispatch('selectNote', note)
-            }
         }
     }
-}]
+}

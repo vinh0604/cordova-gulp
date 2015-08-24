@@ -31,6 +31,7 @@
     "flux-angular": "^2.5.0",
     "font-awesome": "^4.4.0",
     "fuse.js": "^1.2.2",
+    "jquery": "^2.1.4",
     "lodash": "^3.10.1",
     "marked": "^0.3.5",
     "purecss": "^0.6.0"

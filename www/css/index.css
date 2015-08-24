@@ -4862,76 +4862,100 @@ html {
   /* line 20, stdin */
   .sidebar__topbar {
     padding: 10px;
-    display: flex; }
-    /* line 24, stdin */
+    display: flex;
+    border-bottom: solid 1px #e5e5e5; }
+    /* line 25, stdin */
     .sidebar__topbar__search-widget {
       vertical-align: middle;
       white-space: nowrap;
       position: relative;
       width: 145px; }
-      /* line 30, stdin */
+      /* line 31, stdin */
       .sidebar__topbar__search-widget input[type="text"] {
         border-radius: 5px;
         border: solid 1px #e5e5e5;
         padding: 10px 10px 10px 30px;
         box-sizing: border-box;
         width: 100%; }
-        /* line 37, stdin */
+        /* line 38, stdin */
         .sidebar__topbar__search-widget input[type="text"]:focus {
           border-color: #969696;
           outline-color: transparent;
           outline-style: none; }
-      /* line 44, stdin */
+      /* line 45, stdin */
       .sidebar__topbar__search-widget i {
         position: absolute;
         top: 11px;
         left: 11px; }
-    /* line 51, stdin */
+    /* line 52, stdin */
     .sidebar__topbar__add-button {
       border: none;
       text-align: center;
       background: transparent;
       width: 40px; }
-      /* line 57, stdin */
+      /* line 58, stdin */
       .sidebar__topbar__add-button:focus {
         outline-color: transparent;
         outline-style: none; }
-  /* line 64, stdin */
+  /* line 65, stdin */
   .sidebar__list {
     padding: 0;
     margin: 0; }
-  /* line 69, stdin */
+  /* line 70, stdin */
   .sidebar__item {
     border-bottom: solid 1px #e5e5e5;
     padding: 5px 10px;
     color: #6e6e6e;
-    line-height: 20px; }
-    /* line 75, stdin */
+    line-height: 20px;
+    position: relative; }
+    /* line 77, stdin */
     .sidebar__item__title {
       font-weight: 600;
       margin: 0; }
-      /* line 78, stdin */
+      /* line 80, stdin */
       .sidebar__item__title a {
         color: #2b2b2b;
         text-decoration: none; }
-    /* line 84, stdin */
+    /* line 86, stdin */
     .sidebar__item p {
       margin: 0; }
-    /* line 88, stdin */
+    /* line 90, stdin */
     .sidebar__item--selected {
       background-color: antiquewhite; }
+    /* line 94, stdin */
+    .sidebar__item__buttons {
+      padding: 0;
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      display: none; }
+      /* line 101, stdin */
+      .sidebar__item__buttons li {
+        display: inline;
+        padding-right: 3px;
+        font-size: 1.2rem; }
+      /* line 106, stdin */
+      .sidebar__item__buttons a {
+        text-decoration: none;
+        color: #6e6e6e; }
+        /* line 110, stdin */
+        .sidebar__item__buttons a:hover {
+          color: #2b2b2b; }
+    /* line 116, stdin */
+    .sidebar__item:hover .sidebar__item__buttons {
+      display: block; }
 
-/* line 94, stdin */
+/* line 122, stdin */
 .main {
   margin: 0 10px;
   width: calc(100% - 210px);
   display: inline-block;
   line-height: 20px; }
-  /* line 100, stdin */
+  /* line 128, stdin */
   .main__title {
     margin: 10px 0;
     font-size: 2rem; }
-  /* line 106, stdin */
+  /* line 134, stdin */
   .main__form__input-title {
     font-size: 2rem;
     padding: 2px;
@@ -4941,18 +4965,18 @@ html {
     display: block;
     width: 100%;
     margin: 10px 0; }
-    /* line 116, stdin */
+    /* line 144, stdin */
     .main__form__input-title:focus {
       border-bottom: solid 1px #969696;
       outline-color: transparent;
       outline-style: none; }
-  /* line 123, stdin */
+  /* line 151, stdin */
   .main__form__input-content {
     border: none;
     display: block;
     width: 100%;
     resize: none; }
-    /* line 129, stdin */
+    /* line 157, stdin */
     .main__form__input-content:focus {
       outline-color: transparent;
       outline-style: none; }

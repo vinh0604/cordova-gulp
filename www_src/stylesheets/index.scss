@@ -20,6 +20,7 @@ html {
   &__topbar {
     padding: 10px;
     display: flex;
+    border-bottom: solid 1px $light-gray;
 
     &__search-widget {
       vertical-align: middle;
@@ -71,6 +72,7 @@ html {
     padding: 5px 10px;
     color: $gray;
     line-height: 20px;
+    position: relative;
 
     &__title {
       font-weight: 600;
@@ -87,6 +89,32 @@ html {
 
     &--selected {
       background-color: antiquewhite;
+    }
+
+    &__buttons {
+      padding: 0;
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      display: none;
+
+      li {
+        display: inline;
+        padding-right: 3px;
+        font-size: 1.2rem;
+      }
+      a {
+        text-decoration: none;
+        color: $gray;
+
+        &:hover {
+          color: $black;
+        }
+      }
+    }
+
+    &:hover &__buttons {
+      display: block;
     }
   }
 }

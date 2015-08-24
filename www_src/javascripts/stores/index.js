@@ -7,6 +7,7 @@ import Fuse from 'fuse.js'
 var AppStore = angular.module('app.stores', ['flux'])
 .store('NoteStore', function (flux) {
     var dummyNote = { title: '', content: '' }
+    var archivedNotes = []
     var state = flux.immutable({
         notes: [],
         searchedNotes: null,
@@ -28,7 +29,9 @@ var AppStore = angular.module('app.stores', ['flux'])
             'saveNote': 'saveNote',
             'setNotes': 'setNotes',
             'selectNote': 'selectNote',
-            'searchNote': 'searchNote'
+            'searchNote': 'searchNote',
+            'deleteNote': 'deleteNote',
+            'archiveNote': 'archiveNote'
         },
         addNote() {
             let currentMaxId = _.max(state.notes, function (_note) {
@@ -71,6 +74,10 @@ var AppStore = angular.module('app.stores', ['flux'])
             state = state.set('selectedNote', dummyNote)
             state = state.set('editMode', false)
             this.emitChange()
+        },
+        archiveNote(note) {
+            archivedNotes.push(note)
+            this.deleteNote(note)
         },
         setNotes(notes) {
             state = state.set('notes', notes)

@@ -77094,19 +77094,27 @@ module.exports = exports['default'];
 Object.defineProperty(exports, '__esModule', {
     value: true
 });
-exports['default'] = NoteLine;
-
-function NoteLine(flux) {
+exports['default'] = ['flux', function NoteLine(flux) {
     return {
         replace: true,
         templateUrl: 'templates/NoteLine.html',
         restrict: 'E',
         scope: {
             note: '='
+        },
+        controller: function controller($scope) {
+            $scope.archiveNote = function ($event) {
+                $event.preventDefault();
+                flux.dispatch('archiveNote', $scope.note);
+            };
+
+            $scope.deleteNote = function ($event) {
+                $event.preventDefault();
+                flux.dispatch('deleteNote', $scope.note);
+            };
         }
     };
-}
-
+}];
 module.exports = exports['default'];
 
 },{}],28:[function(require,module,exports){
@@ -77337,6 +77345,7 @@ var _fuseJs2 = _interopRequireDefault(_fuseJs);
 
 var AppStore = _angular2['default'].module('app.stores', ['flux']).store('NoteStore', function (flux) {
     var dummyNote = { title: '', content: '' };
+    var archivedNotes = [];
     var state = flux.immutable({
         notes: [],
         searchedNotes: null,
@@ -77358,7 +77367,9 @@ var AppStore = _angular2['default'].module('app.stores', ['flux']).store('NoteSt
             'saveNote': 'saveNote',
             'setNotes': 'setNotes',
             'selectNote': 'selectNote',
-            'searchNote': 'searchNote'
+            'searchNote': 'searchNote',
+            'deleteNote': 'deleteNote',
+            'archiveNote': 'archiveNote'
         },
         addNote: function addNote() {
             var currentMaxId = _lodash2['default'].max(state.notes, function (_note) {
@@ -77401,6 +77412,10 @@ var AppStore = _angular2['default'].module('app.stores', ['flux']).store('NoteSt
             state = state.set('selectedNote', dummyNote);
             state = state.set('editMode', false);
             this.emitChange();
+        },
+        archiveNote: function archiveNote(note) {
+            archivedNotes.push(note);
+            this.deleteNote(note);
         },
         setNotes: function setNotes(notes) {
             state = state.set('notes', notes);

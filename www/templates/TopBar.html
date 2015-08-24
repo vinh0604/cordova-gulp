@@ -1,6 +1,6 @@
 <div class="sidebar__topbar">
   <div class="sidebar__topbar__search-widget">
-    <input type="text" name="search" id="search" placeholder="Search note..."/>
+    <input type="text" name="keyword" id="keyword" placeholder="Search note..." ng-model="keyword" ng-keyup="search()"/>
     <i class="fa fa-search"></i>
   </div>
   <button class="sidebar__topbar__add-button" ng-click="addNote()"><i class="fa fa-plus"></i></button>

@@ -2,19 +2,22 @@ import _ from 'lodash'
 import angular from 'angular'
 import 'flux-angular'
 import Utils from './../utils'
+import Fuse from 'fuse.js'
 
 var AppStore = angular.module('app.stores', ['flux'])
 .store('NoteStore', function (flux) {
+    var dummyNote = { title: '', content: '' }
     var state = flux.immutable({
         notes: [],
-        selectedNote: { title: '', content: '' },
+        searchedNotes: null,
+        selectedNote: dummyNote,
         editMode: false,
         selectedIndex: -1
     })
 
     var findIndex = function (note) {
         return _.findIndex(state.notes, function (_note) {
-            return _note.index === note.index
+            return _note.id === note.id
         })
     }
 
@@ -25,9 +28,9 @@ var AppStore = angular.module('app.stores', ['flux'])
             'saveNote': 'saveNote',
             'setNotes': 'setNotes',
             'selectNote': 'selectNote',
-            'addNote': 'addNote'
+            'searchNote': 'searchNote'
         },
-        addNote: function () {
+        addNote() {
             let currentMaxId = _.max(state.notes, function (_note) {
                 return _note.id
             }) || 0
@@ -41,35 +44,50 @@ var AppStore = angular.module('app.stores', ['flux'])
             state = state.notes.unshift(note)
             this.editNote(note)
         },
-        selectNote: function (note) {
-            let index = findIndex(note)
-
+        selectNote(note) {
             state = state.set('selectedNote', note)
             state = state.set('editMode', false)
-            state = state.set('selectedIndex', index)
             this.emitChange()
         },
-        editNote: function (note) {
+        editNote(note) {
             let index = findIndex(note)
 
             state = state.set('selectedNote', note)
             state = state.set('editMode', true)
-            state = state.set('selectedIndex', index)
             this.emitChange()
         },
-        saveNote: function (note) {
+        saveNote(note) {
+            let index = findIndex(note)
             note.summary = Utils.truncate(note.content, 30)
-            state = state.notes.splice(state.selectedIndex, 1, note)
-            state = state.set('selectedNote', note)
+            state = state.notes.splice(index, 1, note)
+            if (state.selectedNote.id === note.id) {
+                state = state.set('selectedNote', note)
+            }
             this.emitChange()
         },
-        setNotes: function (notes) {
+        setNotes(notes) {
             state = state.set('notes', notes)
+            this.emitChange()
+        },
+        searchNote({keyword}) {
+            if (keyword) {
+                let fuse = new Fuse(state.notes, { keys: ['title', 'content'] })
+                state = state.set('searchedNotes', fuse.search(keyword))
+            } else {
+                state = state.set('searchedNotes', null)
+            }
+
+            state = state.set('selectedNote', dummyNote)
+            state = state.set('editMode', false)
             this.emitChange()
         },
         exports: {
             getNotes: function () {
-                return state.notes
+                if (state.searchedNotes) {
+                    return state.searchedNotes
+                } else {
+                    return state.notes
+                }
             },
             getSelectedNote: function () {
                 return state.selectedNote

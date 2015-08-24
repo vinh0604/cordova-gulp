@@ -10,6 +10,10 @@ export default ['flux', function TopBar (flux) {
             $scope.addNote = function () {
                 flux.dispatch('addNote')
             }
+
+            $scope.search = function ($event) {
+                flux.dispatch('searchNote', { keyword: $scope.keyword })
+            }
         }
     }
 }]

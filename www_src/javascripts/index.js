@@ -21,7 +21,6 @@ app.controller('MainCtrl', ['flux', '$timeout', function (flux, $timeout) {
     ]
     $timeout(function() {
         flux.dispatch('setNotes', notes)
-        flux.dispatch('selectNote', notes[0])
     }, 0);
 }])
 

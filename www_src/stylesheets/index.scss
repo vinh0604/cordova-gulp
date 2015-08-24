@@ -91,6 +91,10 @@ html {
       background-color: antiquewhite;
     }
 
+    &--selected &__buttons {
+      display: block;
+    }
+
     &__buttons {
       padding: 0;
       position: absolute;

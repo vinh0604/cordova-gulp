@@ -4923,39 +4923,42 @@ html {
     .sidebar__item--selected {
       background-color: antiquewhite; }
     /* line 94, stdin */
+    .sidebar__item--selected .sidebar__item__buttons {
+      display: block; }
+    /* line 98, stdin */
     .sidebar__item__buttons {
       padding: 0;
       position: absolute;
       top: 5px;
       right: 5px;
       display: none; }
-      /* line 101, stdin */
+      /* line 105, stdin */
       .sidebar__item__buttons li {
         display: inline;
         padding-right: 3px;
         font-size: 1.2rem; }
-      /* line 106, stdin */
+      /* line 110, stdin */
       .sidebar__item__buttons a {
         text-decoration: none;
         color: #6e6e6e; }
-        /* line 110, stdin */
+        /* line 114, stdin */
         .sidebar__item__buttons a:hover {
           color: #2b2b2b; }
-    /* line 116, stdin */
+    /* line 120, stdin */
     .sidebar__item:hover .sidebar__item__buttons {
       display: block; }
 
-/* line 122, stdin */
+/* line 126, stdin */
 .main {
   margin: 0 10px;
   width: calc(100% - 210px);
   display: inline-block;
   line-height: 20px; }
-  /* line 128, stdin */
+  /* line 132, stdin */
   .main__title {
     margin: 10px 0;
     font-size: 2rem; }
-  /* line 134, stdin */
+  /* line 138, stdin */
   .main__form__input-title {
     font-size: 2rem;
     padding: 2px;
@@ -4965,18 +4968,18 @@ html {
     display: block;
     width: 100%;
     margin: 10px 0; }
-    /* line 144, stdin */
+    /* line 148, stdin */
     .main__form__input-title:focus {
       border-bottom: solid 1px #969696;
       outline-color: transparent;
       outline-style: none; }
-  /* line 151, stdin */
+  /* line 155, stdin */
   .main__form__input-content {
     border: none;
     display: block;
     width: 100%;
     resize: none; }
-    /* line 157, stdin */
+    /* line 161, stdin */
     .main__form__input-content:focus {
       outline-color: transparent;
       outline-style: none; }

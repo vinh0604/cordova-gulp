@@ -77128,10 +77128,29 @@ exports['default'] = ['flux', 'NoteStore', function NoteList(flux, NoteStore) {
                 scope.selectedNote = NoteStore.getSelectedNote();
                 scope.notes = NoteStore.getNotes();
             });
+
+            $(element).on('keydown', 'li', function (event) {
+                var target = $(event.currentTarget);
+
+                switch (event.keyCode) {
+                    case 38:
+                        target.prev().click();
+                        break;
+                    case 40:
+                        target.next().click();
+                        break;
+                    case 13:
+                        target.click();
+                        break;
+                }
+            });
         },
         controller: function controller($scope) {
             $scope.selectNote = function ($event, note) {
                 flux.dispatch('selectNote', note);
+                setTimeout(function () {
+                    $('.sidebar__item--selected').focus();
+                }, 0);
             };
         }
     };
@@ -77374,6 +77393,13 @@ var AppStore = _angular2['default'].module('app.stores', ['flux']).store('NoteSt
             if (state.selectedNote.id === note.id) {
                 state = state.set('selectedNote', note);
             }
+            this.emitChange();
+        },
+        deleteNote: function deleteNote(note) {
+            var index = findIndex(note);
+            state = state.notes.splice(index, 1);
+            state = state.set('selectedNote', dummyNote);
+            state = state.set('editMode', false);
             this.emitChange();
         },
         setNotes: function setNotes(notes) {

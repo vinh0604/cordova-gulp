@@ -65,6 +65,13 @@ var AppStore = angular.module('app.stores', ['flux'])
             }
             this.emitChange()
         },
+        deleteNote(note) {
+            let index = findIndex(note)
+            state = state.notes.splice(index, 1)
+            state = state.set('selectedNote', dummyNote)
+            state = state.set('editMode', false)
+            this.emitChange()
+        },
         setNotes(notes) {
             state = state.set('notes', notes)
             this.emitChange()

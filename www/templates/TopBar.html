@@ -3,5 +3,17 @@
     <input type="text" name="keyword" id="keyword" placeholder="Search note..." ng-model="keyword" ng-keyup="search()"/>
     <i class="fa fa-search"></i>
   </div>
-  <button class="sidebar__topbar__add-button" ng-click="addNote()"><i class="fa fa-plus"></i></button>
+  <ul class="sidebar__topbar__buttons">
+    <li>
+      <a href="#" ng-click="toggleTagFilter($event)"><i class="fa fa-tags"></i></a>
+    </li>
+    <li>
+      <a href="#" ng-click="addNote($event)"><i class="fa fa-plus"></i></a>
+    </li>
+  </ul>
+  <div class="sidebar__topbar__tags" style="display: none">
+    <select name="tags" id="tags" multiple="multiple" data-placeholder="Filter tags...">
+      <option value="{{tag}}" ng-repeat="tag in tags">{{tag}}</option>
+    </select>
+  </div>
 </div>

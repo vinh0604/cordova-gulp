@@ -61,7 +61,7 @@ var AppStore = angular.module('app.stores', ['flux'])
         },
         saveNote(note) {
             let index = findIndex(note)
-            note.summary = Utils.truncate(note.content, 30)
+            note.summary = Utils.truncate(note.content, 50)
             state = state.notes.splice(index, 1, note)
             if (state.selectedNote.id === note.id) {
                 state = state.set('selectedNote', note)

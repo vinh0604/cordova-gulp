@@ -5447,67 +5447,102 @@ html {
         border-width: 12px;
         margin-left: -12px; }
   /* line 110, stdin */
+  .sidebar__list-container {
+    position: relative; }
+  /* line 114, stdin */
   .sidebar__list {
     padding: 0;
     margin: 0; }
-  /* line 115, stdin */
+    /* line 118, stdin */
+    .sidebar__list__tags {
+      position: absolute;
+      padding: 10px;
+      width: 200px;
+      border-radius: 5px;
+      border: 1px solid #969696;
+      top: 0;
+      left: 212px;
+      z-index: 99;
+      background-color: #fff;
+      box-sizing: border-box; }
+      /* line 130, stdin */
+      .sidebar__list__tags:after, .sidebar__list__tags:before {
+        bottom: 100%;
+        left: 30px;
+        border: solid transparent;
+        content: " ";
+        height: 0;
+        width: 0;
+        position: absolute;
+        pointer-events: none; }
+      /* line 141, stdin */
+      .sidebar__list__tags:after {
+        border-bottom-color: #fff;
+        border-width: 10px;
+        margin-left: -10px; }
+      /* line 147, stdin */
+      .sidebar__list__tags:before {
+        border-bottom-color: #969696;
+        border-width: 12px;
+        margin-left: -12px; }
+  /* line 155, stdin */
   .sidebar__item {
     border-bottom: solid 1px #e5e5e5;
     padding: 5px 10px;
     color: #6e6e6e;
     line-height: 20px;
     position: relative; }
-    /* line 122, stdin */
+    /* line 162, stdin */
     .sidebar__item__title {
       font-weight: 600;
       margin: 0; }
-      /* line 125, stdin */
+      /* line 165, stdin */
       .sidebar__item__title a {
         color: #2b2b2b;
         text-decoration: none; }
-    /* line 131, stdin */
+    /* line 171, stdin */
     .sidebar__item p {
       margin: 0; }
-    /* line 135, stdin */
+    /* line 175, stdin */
     .sidebar__item--selected {
       background-color: antiquewhite; }
-    /* line 139, stdin */
+    /* line 179, stdin */
     .sidebar__item--selected .sidebar__item__buttons {
       display: block; }
-    /* line 143, stdin */
+    /* line 183, stdin */
     .sidebar__item__buttons {
       padding: 0;
       position: absolute;
       top: 5px;
       right: 5px;
       display: none; }
-      /* line 150, stdin */
+      /* line 190, stdin */
       .sidebar__item__buttons li {
         display: inline;
         padding-right: 3px;
         font-size: 1.2rem; }
-      /* line 155, stdin */
+      /* line 195, stdin */
       .sidebar__item__buttons a {
         text-decoration: none;
         color: #6e6e6e; }
-        /* line 159, stdin */
+        /* line 199, stdin */
         .sidebar__item__buttons a:hover {
           color: #2b2b2b; }
-    /* line 165, stdin */
+    /* line 205, stdin */
     .sidebar__item:hover .sidebar__item__buttons {
       display: block; }
 
-/* line 171, stdin */
+/* line 211, stdin */
 .main {
   margin: 0 10px;
   width: calc(100% - 310px);
   display: inline-block;
   line-height: 20px; }
-  /* line 177, stdin */
+  /* line 217, stdin */
   .main__title {
     margin: 10px 0;
     font-size: 2rem; }
-  /* line 183, stdin */
+  /* line 223, stdin */
   .main__form__input-title {
     font-size: 2rem;
     padding: 2px;
@@ -5517,18 +5552,18 @@ html {
     display: block;
     width: 100%;
     margin: 10px 0; }
-    /* line 193, stdin */
+    /* line 233, stdin */
     .main__form__input-title:focus {
       border-bottom: solid 1px #969696;
       outline-color: transparent;
       outline-style: none; }
-  /* line 200, stdin */
+  /* line 240, stdin */
   .main__form__input-content {
     border: none;
     display: block;
     width: 100%;
     resize: none; }
-    /* line 206, stdin */
+    /* line 246, stdin */
     .main__form__input-content:focus {
       outline-color: transparent;
       outline-style: none; }

@@ -6,20 +6,44 @@ import Fuse from 'fuse.js'
 
 var AppStore = angular.module('app.stores', ['flux'])
 .store('NoteStore', function (flux) {
-    var dummyNote = { title: '', content: '' }
+    var dummyNote = { title: '', content: '', tags: [] }
     var archivedNotes = []
     var state = flux.immutable({
         notes: [],
         searchedNotes: null,
         selectedNote: dummyNote,
         editMode: false,
-        selectedIndex: -1
+        selectedIndex: -1,
+        tags: [],
+        keyword: '',
+        filteredTags: []
     })
 
     var findIndex = function (note) {
         return _.findIndex(state.notes, function (_note) {
             return _note.id === note.id
         })
+    }
+
+    var search = function (keyword, tags) {
+        if (!keyword && tags.length === 0) {
+            return null
+        }
+
+        let notes = state.notes
+
+        if (keyword) {
+            let fuse = new Fuse(notes, { keys: ['title', 'content'] })
+            notes = fuse.search(keyword)
+        }
+
+        if (tags.length > 0) {
+            notes = _.select(notes, (note) => {
+                return _.intersection(tags, note.tags).length > 0
+            })
+        }
+
+        return notes;
     }
 
     return {
@@ -31,7 +55,10 @@ var AppStore = angular.module('app.stores', ['flux'])
             'selectNote': 'selectNote',
             'searchNote': 'searchNote',
             'deleteNote': 'deleteNote',
-            'archiveNote': 'archiveNote'
+            'archiveNote': 'archiveNote',
+            'filterTags': 'filterTags',
+            'addTag': 'addTag',
+            'updateNoteTags': 'updateNoteTags'
         },
         addNote() {
             let currentMaxId = _.max(state.notes, function (_note) {
@@ -41,7 +68,8 @@ var AppStore = angular.module('app.stores', ['flux'])
             let note = {
                 id: currentMaxId + 1,
                 title: '',
-                content: ''
+                content: '',
+                tags: []
             }
 
             state = state.notes.unshift(note)
@@ -84,15 +112,30 @@ var AppStore = angular.module('app.stores', ['flux'])
             this.emitChange()
         },
         searchNote({keyword}) {
-            if (keyword) {
-                let fuse = new Fuse(state.notes, { keys: ['title', 'content'] })
-                state = state.set('searchedNotes', fuse.search(keyword))
-            } else {
-                state = state.set('searchedNotes', null)
-            }
-
+            state = state.set('keyword', keyword)
+            state = state.set('searchedNotes', search(keyword, state.filteredTags))
             state = state.set('selectedNote', dummyNote)
             state = state.set('editMode', false)
+            this.emitChange()
+        },
+        filterTags({tags}) {
+            tags = tags || []
+            state = state.set('filteredTags', tags)
+            state = state.set('searchedNotes', search(state.keyword, tags))
+            state = state.set('selectedNote', dummyNote)
+            state = state.set('editMode', false)
+            this.emitChange()
+        },
+        addTag({tag}) {
+            if (state.tags.indexOf(tag) < 0) {
+                state = state.tags.push(tag)
+            }
+            this.emitChange()
+        },
+        updateNoteTags({tags, note}) {
+            let index = findIndex(note)
+            note.tags = tags || []
+            state = state.notes.splice(index, 1, note)
             this.emitChange()
         },
         exports: {
@@ -108,6 +151,9 @@ var AppStore = angular.module('app.stores', ['flux'])
             },
             getEditMode: function () {
                 return state.editMode
+            },
+            getTags: function () {
+                return state.tags
             }
         }
     }

@@ -77094,15 +77094,20 @@ module.exports = exports['default'];
 Object.defineProperty(exports, '__esModule', {
     value: true
 });
+var $ = require('jquery');
+window.jQuery = $;
+var chosen = require('./../../vendor/chosen.jquery');
+
 exports['default'] = ['flux', function NoteLine(flux) {
     return {
         replace: true,
         templateUrl: 'templates/NoteLine.html',
         restrict: 'E',
         scope: {
-            note: '='
+            note: '=',
+            toggleTagAdd: '='
         },
-        controller: function controller($scope) {
+        controller: function controller($scope, $element) {
             $scope.archiveNote = function ($event) {
                 $event.preventDefault();
                 flux.dispatch('archiveNote', $scope.note);
@@ -77117,12 +77122,19 @@ exports['default'] = ['flux', function NoteLine(flux) {
 }];
 module.exports = exports['default'];
 
-},{}],28:[function(require,module,exports){
+},{"./../../vendor/chosen.jquery":35,"jquery":22}],28:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
     value: true
 });
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _lodash = require('lodash');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
 var $ = require('jquery');
 
 exports['default'] = ['flux', 'NoteStore', function NoteList(flux, NoteStore) {
@@ -77132,9 +77144,11 @@ exports['default'] = ['flux', 'NoteStore', function NoteList(flux, NoteStore) {
         restrict: 'E',
         link: function link(scope, element, attr) {
             scope.notes = NoteStore.getNotes();
+            scope.tags = NoteStore.getTags();
             scope.$listenTo(NoteStore, function () {
                 scope.selectedNote = NoteStore.getSelectedNote();
                 scope.notes = NoteStore.getNotes();
+                scope.tags = NoteStore.getTags();
             });
 
             $(element).on('keydown', 'li', function (event) {
@@ -77152,20 +77166,64 @@ exports['default'] = ['flux', 'NoteStore', function NoteList(flux, NoteStore) {
                         break;
                 }
             });
+
+            setTimeout(function () {
+                scope.chosen = $(element).find('#note_tags').chosen({
+                    width: '100%',
+                    create_option: function create_option(tag) {
+                        flux.dispatch('addTag', { tag: tag });
+                        this.append_option({
+                            value: tag,
+                            text: tag
+                        });
+                    }
+                });
+
+                scope.chosen.change(function (event) {
+                    if (scope.currentNote) {
+                        flux.dispatch('updateNoteTags', { tags: $(this).val(), note: scope.currentNote });
+                    }
+                });
+
+                $(element).find('.chosen-container .search-field input').blur(function () {
+                    setTimeout(function () {
+                        element.find('.sidebar__list__tags').hide();
+                    }, 1000);
+                });
+            }, 0);
         },
-        controller: function controller($scope) {
+        controller: function controller($scope, $element) {
             $scope.selectNote = function ($event, note) {
                 flux.dispatch('selectNote', note);
                 setTimeout(function () {
                     $('.sidebar__item--selected').focus();
                 }, 0);
             };
+
+            $scope.toggleTagAdd = function ($event, note) {
+                $event.preventDefault();
+                $scope.chosen.val('').html('').trigger('chosen:updated');
+
+                if (!$scope.currentNote || note.id != $scope.currentNote.id) {
+                    $scope.currentNote = note;
+                    _lodash2['default'].each($scope.tags, function (tag) {
+                        $scope.chosen.append('<option value="' + tag + '">' + tag + '</option>');
+                    });
+                    $scope.chosen.val(note.tags).trigger('chosen:updated');
+
+                    var position = $($event.currentTarget).closest('.sidebar__item').position();
+                    $element.find('.sidebar__list__tags').show().css({ top: position.top + 35 + 'px' });
+                } else {
+                    $scope.currentNote = null;
+                    $element.find('.sidebar__list__tags').hide();
+                }
+            };
         }
     };
 }];
 module.exports = exports['default'];
 
-},{"jquery":22}],29:[function(require,module,exports){
+},{"jquery":22,"lodash":23}],29:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -77211,16 +77269,25 @@ var $ = require('jquery');
 window.jQuery = $;
 var chosen = require('./../../vendor/chosen.jquery');
 
-exports['default'] = ['flux', function TopBar(flux) {
+exports['default'] = ['flux', 'NoteStore', function TopBar(flux, NoteStore) {
     return {
         replace: true,
         templateUrl: 'templates/TopBar.html',
         restrict: 'E',
         link: function link(scope, element, attr) {
-            scope.tags = ['foo', 'bar', 'shoe'];
+            scope.tags = NoteStore.getTags();
+            scope.$listenTo(NoteStore, function () {
+                scope.tags = NoteStore.getTags();
+                $(element).find('#tags').trigger('chosen:updated');
+            });
+
             setTimeout(function () {
                 $(element).find('#tags').chosen({ width: '100%' }).change(function (event) {
-                    flux.dispatch('filterTags', { tags: $(this).val() });
+                    var _this = this;
+
+                    scope.$apply(function () {
+                        flux.dispatch('filterTags', { tags: $(_this).val() });
+                    });
                 });
             }, 0);
         },
@@ -77362,20 +77429,44 @@ var _fuseJs = require('fuse.js');
 var _fuseJs2 = _interopRequireDefault(_fuseJs);
 
 var AppStore = _angular2['default'].module('app.stores', ['flux']).store('NoteStore', function (flux) {
-    var dummyNote = { title: '', content: '' };
+    var dummyNote = { title: '', content: '', tags: [] };
     var archivedNotes = [];
     var state = flux.immutable({
         notes: [],
         searchedNotes: null,
         selectedNote: dummyNote,
         editMode: false,
-        selectedIndex: -1
+        selectedIndex: -1,
+        tags: [],
+        keyword: '',
+        filteredTags: []
     });
 
     var findIndex = function findIndex(note) {
         return _lodash2['default'].findIndex(state.notes, function (_note) {
             return _note.id === note.id;
         });
+    };
+
+    var search = function search(keyword, tags) {
+        if (!keyword && tags.length === 0) {
+            return null;
+        }
+
+        var notes = state.notes;
+
+        if (keyword) {
+            var fuse = new _fuseJs2['default'](notes, { keys: ['title', 'content'] });
+            notes = fuse.search(keyword);
+        }
+
+        if (tags.length > 0) {
+            notes = _lodash2['default'].select(notes, function (note) {
+                return _lodash2['default'].intersection(tags, note.tags).length > 0;
+            });
+        }
+
+        return notes;
     };
 
     return {
@@ -77387,7 +77478,10 @@ var AppStore = _angular2['default'].module('app.stores', ['flux']).store('NoteSt
             'selectNote': 'selectNote',
             'searchNote': 'searchNote',
             'deleteNote': 'deleteNote',
-            'archiveNote': 'archiveNote'
+            'archiveNote': 'archiveNote',
+            'filterTags': 'filterTags',
+            'addTag': 'addTag',
+            'updateNoteTags': 'updateNoteTags'
         },
         addNote: function addNote() {
             var currentMaxId = _lodash2['default'].max(state.notes, function (_note) {
@@ -77397,7 +77491,8 @@ var AppStore = _angular2['default'].module('app.stores', ['flux']).store('NoteSt
             var note = {
                 id: currentMaxId + 1,
                 title: '',
-                content: ''
+                content: '',
+                tags: []
             };
 
             state = state.notes.unshift(note);
@@ -77442,15 +77537,37 @@ var AppStore = _angular2['default'].module('app.stores', ['flux']).store('NoteSt
         searchNote: function searchNote(_ref) {
             var keyword = _ref.keyword;
 
-            if (keyword) {
-                var fuse = new _fuseJs2['default'](state.notes, { keys: ['title', 'content'] });
-                state = state.set('searchedNotes', fuse.search(keyword));
-            } else {
-                state = state.set('searchedNotes', null);
-            }
-
+            state = state.set('keyword', keyword);
+            state = state.set('searchedNotes', search(keyword, state.filteredTags));
             state = state.set('selectedNote', dummyNote);
             state = state.set('editMode', false);
+            this.emitChange();
+        },
+        filterTags: function filterTags(_ref2) {
+            var tags = _ref2.tags;
+
+            tags = tags || [];
+            state = state.set('filteredTags', tags);
+            state = state.set('searchedNotes', search(state.keyword, tags));
+            state = state.set('selectedNote', dummyNote);
+            state = state.set('editMode', false);
+            this.emitChange();
+        },
+        addTag: function addTag(_ref3) {
+            var tag = _ref3.tag;
+
+            if (state.tags.indexOf(tag) < 0) {
+                state = state.tags.push(tag);
+            }
+            this.emitChange();
+        },
+        updateNoteTags: function updateNoteTags(_ref4) {
+            var tags = _ref4.tags;
+            var note = _ref4.note;
+
+            var index = findIndex(note);
+            note.tags = tags || [];
+            state = state.notes.splice(index, 1, note);
             this.emitChange();
         },
         exports: {
@@ -77466,6 +77583,9 @@ var AppStore = _angular2['default'].module('app.stores', ['flux']).store('NoteSt
             },
             getEditMode: function getEditMode() {
                 return state.editMode;
+            },
+            getTags: function getTags() {
+                return state.tags;
             }
         }
     };
@@ -77504,9 +77624,9 @@ module.exports = exports['default'];
 Chosen, a Select Box Enhancer for jQuery and Prototype
 by Patrick Filler for Harvest, http://getharvest.com
 
-Version 1.4.2
+Version 1.1.0
 Full source at https://github.com/harvesthq/chosen
-Copyright (c) 2011-2015 Harvest http://getharvest.com
+Copyright (c) 2011 Harvest http://getharvest.com
 
 MIT License, https://github.com/harvesthq/chosen/blob/master/LICENSE.md
 This file is generated by `grunt build`, do not edit it by hand.
@@ -77550,10 +77670,8 @@ This file is generated by `grunt build`, do not edit it by hand.
         array_index: group_position,
         group: true,
         label: this.escapeExpression(group.label),
-        title: group.title ? group.title : void 0,
         children: 0,
-        disabled: group.disabled,
-        classes: group.className
+        disabled: group.disabled
       });
       _ref = group.childNodes;
       _results = [];
@@ -77576,11 +77694,9 @@ This file is generated by `grunt build`, do not edit it by hand.
             value: option.value,
             text: option.text,
             html: option.innerHTML,
-            title: option.title ? option.title : void 0,
             selected: option.selected,
             disabled: group_disabled === true ? group_disabled : option.disabled,
             group_array_index: group_position,
-            group_label: group_position != null ? this.parsed[group_position].label : null,
             classes: option.className,
             style: option.style.cssText
           });
@@ -77643,7 +77759,6 @@ This file is generated by `grunt build`, do not edit it by hand.
       this.setup();
       this.set_up_html();
       this.register_observers();
-      this.on_ready();
     }
 
     AbstractChosen.prototype.set_default_values = function () {
@@ -77669,7 +77784,9 @@ This file is generated by `grunt build`, do not edit it by hand.
       this.inherit_select_classes = this.options.inherit_select_classes || false;
       this.display_selected_options = this.options.display_selected_options != null ? this.options.display_selected_options : true;
       this.display_disabled_options = this.options.display_disabled_options != null ? this.options.display_disabled_options : true;
-      return this.include_group_label_in_selected = this.options.include_group_label_in_selected || false;
+      this.create_option = this.options.create_option || false;
+      this.persistent_create_option = this.options.persistent_create_option || false;
+      return this.skip_no_results = this.options.skip_no_results || false;
     };
 
     AbstractChosen.prototype.set_default_text = function () {
@@ -77680,15 +77797,8 @@ This file is generated by `grunt build`, do not edit it by hand.
       } else {
         this.default_text = this.options.placeholder_text_single || this.options.placeholder_text || AbstractChosen.default_single_text;
       }
-      return this.results_none_found = this.form_field.getAttribute("data-no_results_text") || this.options.no_results_text || AbstractChosen.default_no_result_text;
-    };
-
-    AbstractChosen.prototype.choice_label = function (item) {
-      if (this.include_group_label_in_selected && item.group_label != null) {
-        return "<b class='group-name'>" + item.group_label + "</b>" + item.html;
-      } else {
-        return item.html;
-      }
+      this.results_none_found = this.form_field.getAttribute("data-no_results_text") || this.options.no_results_text || AbstractChosen.default_no_result_text;
+      return this.create_option_text = this.form_field.getAttribute("data-create_option_text") || this.options.create_option_text || AbstractChosen.default_create_option_text;
     };
 
     AbstractChosen.prototype.mouse_enter = function () {
@@ -77739,7 +77849,7 @@ This file is generated by `grunt build`, do not edit it by hand.
           if (data.selected && this.is_multiple) {
             this.choice_build(data);
           } else if (data.selected && !this.is_multiple) {
-            this.single_set_selected_text(this.choice_label(data));
+            this.single_set_selected_text(data.text);
           }
         }
       }
@@ -77775,32 +77885,25 @@ This file is generated by `grunt build`, do not edit it by hand.
       option_el.style.cssText = option.style;
       option_el.setAttribute("data-option-array-index", option.array_index);
       option_el.innerHTML = option.search_text;
-      if (option.title) {
-        option_el.title = option.title;
-      }
       return this.outerHTML(option_el);
     };
 
     AbstractChosen.prototype.result_add_group = function (group) {
-      var classes, group_el;
+      var group_el;
       if (!(group.search_match || group.group_match)) {
         return '';
       }
       if (!(group.active_options > 0)) {
         return '';
       }
-      classes = [];
-      classes.push("group-result");
-      if (group.classes) {
-        classes.push(group.classes);
-      }
       group_el = document.createElement("li");
-      group_el.className = classes.join(" ");
+      group_el.className = "group-result";
       group_el.innerHTML = group.search_text;
-      if (group.title) {
-        group_el.title = group.title;
-      }
       return this.outerHTML(group_el);
+    };
+
+    AbstractChosen.prototype.append_option = function (option) {
+      return this.select_append_option(option);
     };
 
     AbstractChosen.prototype.results_update_field = function () {
@@ -77847,13 +77950,16 @@ This file is generated by `grunt build`, do not edit it by hand.
     };
 
     AbstractChosen.prototype.winnow_results = function () {
-      var escapedSearchText, option, regex, results, results_group, searchText, startpos, text, zregex, _i, _len, _ref;
+      var eregex, escapedSearchText, exact_result, option, regex, regexAnchor, results, results_group, searchText, startpos, text, zregex, _i, _len, _ref;
       this.no_results_clear();
       results = 0;
+      exact_result = false;
       searchText = this.get_search_text();
       escapedSearchText = searchText.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+      regexAnchor = this.search_contains ? "" : "^";
+      regex = new RegExp(regexAnchor + escapedSearchText, 'i');
       zregex = new RegExp(escapedSearchText, 'i');
-      regex = this.get_search_regex(escapedSearchText);
+      eregex = new RegExp('^' + escapedSearchText + '$', 'i');
       _ref = this.results_data;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         option = _ref[_i];
@@ -77871,12 +77977,13 @@ This file is generated by `grunt build`, do not edit it by hand.
             }
             results_group.active_options += 1;
           }
-          option.search_text = option.group ? option.label : option.html;
           if (!(option.group && !this.group_search)) {
+            option.search_text = option.group ? option.label : option.html;
             option.search_match = this.search_string_match(option.search_text, regex);
             if (option.search_match && !option.group) {
               results += 1;
             }
+            exact_result = eregex.test(option.html);
             if (option.search_match) {
               if (searchText.length) {
                 startpos = option.search_text.search(zregex);
@@ -77895,17 +78002,16 @@ This file is generated by `grunt build`, do not edit it by hand.
       this.result_clear_highlight();
       if (results < 1 && searchText.length) {
         this.update_results_content("");
-        return this.no_results(searchText);
+        if (!(this.create_option && this.skip_no_results)) {
+          this.no_results(searchText);
+        }
       } else {
         this.update_results_content(this.results_option_build());
-        return this.winnow_results_set_highlight();
+        this.winnow_results_set_highlight();
       }
-    };
-
-    AbstractChosen.prototype.get_search_regex = function (escaped_search_string) {
-      var regex_anchor;
-      regex_anchor = this.search_contains ? "" : "^";
-      return new RegExp(regex_anchor + escaped_search_string, 'i');
+      if (this.create_option && (results < 1 || !exact_result && this.persistent_create_option) && searchText.length) {
+        return this.show_create_option(searchText);
+      }
     };
 
     AbstractChosen.prototype.search_string_match = function (search_string, regex) {
@@ -78059,6 +78165,8 @@ This file is generated by `grunt build`, do not edit it by hand.
 
     AbstractChosen.default_no_result_text = "No results match";
 
+    AbstractChosen.default_create_option_text = "Add Option";
+
     return AbstractChosen;
   })();
 
@@ -78073,9 +78181,9 @@ This file is generated by `grunt build`, do not edit it by hand.
         var $this, chosen;
         $this = $(this);
         chosen = $this.data('chosen');
-        if (options === 'destroy' && chosen instanceof Chosen) {
+        if (options === 'destroy' && chosen) {
           chosen.destroy();
-        } else if (!(chosen instanceof Chosen)) {
+        } else if (!chosen) {
           $this.data('chosen', new Chosen(this, options));
         }
       });
@@ -78135,10 +78243,7 @@ This file is generated by `grunt build`, do not edit it by hand.
       }
       this.results_build();
       this.set_tab_index();
-      return this.set_label_behavior();
-    };
-
-    Chosen.prototype.on_ready = function () {
+      this.set_label_behavior();
       return this.form_field_jq.trigger("chosen:ready", {
         chosen: this
       });
@@ -78146,14 +78251,6 @@ This file is generated by `grunt build`, do not edit it by hand.
 
     Chosen.prototype.register_observers = function () {
       var _this = this;
-      this.container.bind('touchstart.chosen', function (evt) {
-        _this.container_mousedown(evt);
-        return evt.preventDefault();
-      });
-      this.container.bind('touchend.chosen', function (evt) {
-        _this.container_mouseup(evt);
-        return evt.preventDefault();
-      });
       this.container.bind('mousedown.chosen', function (evt) {
         _this.container_mousedown(evt);
       });
@@ -78286,7 +78383,7 @@ This file is generated by `grunt build`, do not edit it by hand.
     Chosen.prototype.search_results_mousewheel = function (evt) {
       var delta;
       if (evt.originalEvent) {
-        delta = evt.originalEvent.deltaY || -evt.originalEvent.wheelDelta || evt.originalEvent.detail;
+        delta = -evt.originalEvent.wheelDelta || evt.originalEvent.detail;
       }
       if (delta != null) {
         evt.preventDefault();
@@ -78338,7 +78435,7 @@ This file is generated by `grunt build`, do not edit it by hand.
         this.search_choices.find("li.search-choice").remove();
       } else if (!this.is_multiple) {
         this.single_set_selected_text();
-        if (this.disable_search || this.form_field.options.length <= this.disable_search_threshold) {
+        if (this.disable_search || this.form_field.options.length <= this.disable_search_threshold && !this.create_option) {
           this.search_field[0].readOnly = true;
           this.container.addClass("chosen-container-single-nosearch");
         } else {
@@ -78479,7 +78576,7 @@ This file is generated by `grunt build`, do not edit it by hand.
           _this = this;
       choice = $('<li />', {
         "class": "search-choice"
-      }).html("<span>" + this.choice_label(item) + "</span>");
+      }).html("<span>" + item.html + "</span>");
       if (item.disabled) {
         choice.addClass('search-choice-disabled');
       } else {
@@ -78535,6 +78632,10 @@ This file is generated by `grunt build`, do not edit it by hand.
       var high, item;
       if (this.result_highlight) {
         high = this.result_highlight;
+        if (high.hasClass("create-option")) {
+          this.select_create_option(this.search_field.val());
+          return this.results_hide();
+        }
         this.result_clear_highlight();
         if (this.is_multiple && this.max_selected_options <= this.choices_count()) {
           this.form_field_jq.trigger("chosen:maxselected", {
@@ -78547,7 +78648,6 @@ This file is generated by `grunt build`, do not edit it by hand.
         } else {
           this.reset_single_select_options();
         }
-        high.addClass("result-selected");
         item = this.results_data[high[0].getAttribute("data-option-array-index")];
         item.selected = true;
         this.form_field.options[item.options_index].selected = true;
@@ -78555,7 +78655,7 @@ This file is generated by `grunt build`, do not edit it by hand.
         if (this.is_multiple) {
           this.choice_build(item);
         } else {
-          this.single_set_selected_text(this.choice_label(item));
+          this.single_set_selected_text(item.text);
         }
         if (!((evt.metaKey || evt.ctrlKey) && this.is_multiple)) {
           this.results_hide();
@@ -78567,7 +78667,6 @@ This file is generated by `grunt build`, do not edit it by hand.
           });
         }
         this.current_selectedIndex = this.form_field.selectedIndex;
-        evt.preventDefault();
         return this.search_field_scale();
       }
     };
@@ -78582,7 +78681,7 @@ This file is generated by `grunt build`, do not edit it by hand.
         this.single_deselect_control_build();
         this.selected_item.removeClass("chosen-default");
       }
-      return this.selected_item.find("span").html(text);
+      return this.selected_item.find("span").text(text);
     };
 
     Chosen.prototype.result_deselect = function (pos) {
@@ -78617,7 +78716,11 @@ This file is generated by `grunt build`, do not edit it by hand.
     };
 
     Chosen.prototype.get_search_text = function () {
-      return $('<div/>').text($.trim(this.search_field.val())).html();
+      if (this.search_field.val() === this.default_text) {
+        return "";
+      } else {
+        return $('<div/>').text($.trim(this.search_field.val())).html();
+      }
     };
 
     Chosen.prototype.winnow_results_set_highlight = function () {
@@ -78639,6 +78742,36 @@ This file is generated by `grunt build`, do not edit it by hand.
       });
     };
 
+    Chosen.prototype.show_create_option = function (terms) {
+      var create_option_html;
+      create_option_html = $('<li class="create-option active-result"><a>' + this.create_option_text + '</a>: "' + terms + '"</li>');
+      return this.search_results.append(create_option_html);
+    };
+
+    Chosen.prototype.create_option_clear = function () {
+      return this.search_results.find(".create-option").remove();
+    };
+
+    Chosen.prototype.select_create_option = function (terms) {
+      if ($.isFunction(this.create_option)) {
+        return this.create_option.call(this, terms);
+      } else {
+        return this.select_append_option({
+          value: terms,
+          text: terms
+        });
+      }
+    };
+
+    Chosen.prototype.select_append_option = function (options) {
+      var option;
+      option = $('<option />', options).attr('selected', 'selected');
+      this.form_field_jq.append(option);
+      this.form_field_jq.trigger("chosen:updated");
+      this.form_field_jq.trigger("change");
+      return this.search_field.trigger("focus");
+    };
+
     Chosen.prototype.no_results_clear = function () {
       return this.search_results.find(".no-results").remove();
     };
@@ -78650,6 +78783,8 @@ This file is generated by `grunt build`, do not edit it by hand.
         if (next_sib) {
           return this.result_do_highlight(next_sib);
         }
+      } else if (this.results_showing && this.create_option) {
+        return this.result_do_highlight(this.search_results.find('.create-option'));
       } else {
         return this.results_show();
       }
@@ -78715,14 +78850,7 @@ This file is generated by `grunt build`, do not edit it by hand.
           this.mouse_on_container = false;
           break;
         case 13:
-          if (this.results_showing) {
-            evt.preventDefault();
-          }
-          break;
-        case 32:
-          if (this.disable_search) {
-            evt.preventDefault();
-          }
+          evt.preventDefault();
           break;
         case 38:
           evt.preventDefault();

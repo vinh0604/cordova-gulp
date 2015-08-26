@@ -1,5 +1,11 @@
-<ul class="sidebar__list">
-  <li ng-repeat="note in notes" class="sidebar__item" tabindex="{{$index}}" ng-class="{'sidebar__item--selected': selectedNote.id === note.id}" ng-click="selectNote($event, note)">
-    <note-line note="note"/>
-  </li>
-</ul>
+<div class="sidebar__list-container">
+  <ul class="sidebar__list">
+    <li ng-repeat="note in notes" class="sidebar__item" tabindex="{{$index}}" ng-class="{'sidebar__item--selected': selectedNote.id === note.id}" ng-click="selectNote($event, note)">
+      <note-line note="note" toggle-tag-add="toggleTagAdd"/>
+    </li>
+  </ul>
+  <div class="sidebar__list__tags" style="display: none">
+    <select name="tags" id="note_tags" multiple="multiple" data-placeholder="Add some tags...">
+    </select>
+  </div>
+</div>

@@ -13,6 +13,38 @@ html {
   align-items: flex-start;
 }
 
+%arrow {
+  position: absolute;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid $light-black;
+  z-index: 99;
+  background-color: $white;
+  box-sizing: border-box;
+
+  &:after, &:before {
+    bottom: 100%;
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+  }
+
+  &:after {
+    border-bottom-color: $white;
+    border-width: 10px;
+    margin-left: -10px;
+  }
+
+  &:before {
+    border-bottom-color: $light-black;
+    border-width: 12px;
+    margin-left: -12px;
+  }
+}
+
 .sidebar {
   width: 300px;
   display: inline-block;
@@ -71,38 +103,13 @@ html {
     }
 
     &__tags {
-      position: absolute;
-      padding: 10px;
+      @extend %arrow;
       width: 100%;
-      border-radius: 5px;
-      border: 1px solid $light-black;
       top: 50px;
       left: 0;
-      z-index: 99;
-      background-color: $white;
-      box-sizing: border-box;
 
       &:after, &:before {
-        bottom: 100%;
         left: 250px;
-        border: solid transparent;
-        content: " ";
-        height: 0;
-        width: 0;
-        position: absolute;
-        pointer-events: none;
-      }
-
-      &:after {
-        border-bottom-color: $white;
-        border-width: 10px;
-        margin-left: -10px;
-      }
-
-      &:before {
-        border-bottom-color: $light-black;
-        border-width: 12px;
-        margin-left: -12px;
       }
     }
   }
@@ -116,38 +123,13 @@ html {
     margin: 0;
 
     &__tags {
-      position: absolute;
-      padding: 10px;
+      @extend %arrow;
       width: 200px;
-      border-radius: 5px;
-      border: 1px solid $light-black;
       top: 0;
       left: 212px;
-      z-index: 99;
-      background-color: $white;
-      box-sizing: border-box;
 
       &:after, &:before {
-        bottom: 100%;
         left: 30px;
-        border: solid transparent;
-        content: " ";
-        height: 0;
-        width: 0;
-        position: absolute;
-        pointer-events: none;
-      }
-
-      &:after {
-        border-bottom-color: $white;
-        border-width: 10px;
-        margin-left: -10px;
-      }
-
-      &:before {
-        border-bottom-color: $light-black;
-        border-width: 12px;
-        margin-left: -12px;
       }
     }
   }
